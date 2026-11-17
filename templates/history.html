@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block body %}<h1>Attendance History</h1>
+<form class="card" method="get"><select name="class_id" onchange="this.form.submit()"><option value="">All classes</option>{% for c in classes %}<option value="{{ c.class_id }}" {{ 'selected' if cid==c.class_id }}>{{ c.class_code }} - {{ c.course_name }}</option>{% endfor %}</select></form>
+{% for d in data %}<div class="card"><h2>{{ d.cls.class_code }} - {{ d.cls.course_name }}</h2><p>Absence rate: <b>{{ d.rate }}%</b></p>
+<div class="table-wrap"><table><tr><th>Date</th><th>Time</th><th>Room</th><th>Status</th><th>Method</th></tr>
+{% for r in d.rows %}<tr><td>{{ r.session_date }}</td><td>{{ r.start_time }}</td><td>{{ r.room }}</td><td>{% if r.status %}<span class="badge {{ r.status }}">{{ r.status.title() }}</span>{% else %}<span class="muted">Not recorded</span>{% endif %}</td><td>{{ r.method or '' }}</td></tr>{% endfor %}</table></div></div>
+{% else %}<div class="card muted">No classes found.</div>{% endfor %}{% endblock %}

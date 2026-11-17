@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block body %}<h1>Scan QR Code</h1>
+<div class="card"><div id="reader" style="max-width:360px;margin:auto"></div><p class="muted center">Point the camera at the QR code shown by your lecturer, or enter the code below.</p>
+<form method="post" id="f"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Attendance code</label><input name="token" id="token" autocomplete="off"><button class="btn">Check in</button></form></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script>if(window.Html5QrcodeScanner){new Html5QrcodeScanner("reader",{fps:10,qrbox:220}).render(function(t){document.getElementById("token").value=t;document.getElementById("f").submit();});}</script>{% endblock %}

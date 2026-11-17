@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% block body %}<h1>User Accounts</h1>
+<form class="card row" method="get"><input name="q" placeholder="Search username, name or email" value="{{ q }}"><select name="role"><option value="">All roles</option><option value="STUDENT" {{ 'selected' if role=='STUDENT' }}>Student</option><option value="LECTURER" {{ 'selected' if role=='LECTURER' }}>Lecturer</option></select><button class="btn" style="margin:0">Search</button></form>
+<div class="card"><a class="btn sm" href="{{ url_for('admin.new_user') }}">+ Add account</a>
+<form class="inline" method="post" action="{{ url_for('admin.import_students') }}" enctype="multipart/form-data"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="file" name="file" accept=".xlsx" style="width:auto"><button class="btn sm gray">Import students (.xlsx)</button></form>
+<p class="muted">Excel columns: username, full_name, email, student_code, major (optional). Initial password = student code + @123.</p></div>
+<div class="card table-wrap"><table><tr><th>Username</th><th>Name</th><th>Role</th><th>Code</th><th>Email</th><th>Status</th><th></th></tr>
+{% for u in users %}<tr><td>{{ u.username }}</td><td>{{ u.full_name }}</td><td>{{ u.role.title() }}</td><td>{{ u.code }}</td><td>{{ u.email }}</td><td>{{ 'Locked' if u.is_locked else 'Active' }}</td><td>
+<a href="{{ url_for('admin.edit_user', uid=u.user_id) }}">Edit</a>{% if u.role!='ADMIN' %} &middot; {% if u.is_locked %}<a href="{{ url_for('admin.lock', uid=u.user_id, action='unlock') }}">Unlock</a>{% else %}<a href="{{ url_for('admin.lock', uid=u.user_id, action='lock') }}">Lock</a>{% endif %}{% endif %}</td></tr>{% endfor %}</table></div>{% endblock %}

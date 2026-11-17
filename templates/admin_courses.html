@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block body %}<h1>Courses and Classes</h1>
+<div class="card"><h2>Add faculty</h2><form class="row" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="faculty"><input name="name" placeholder="Faculty name"><button class="btn" style="margin:0">Add</button></form></div>
+<div class="card"><h2>Add course</h2><form class="row" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="course">
+<input name="code" placeholder="Code"><input name="name" placeholder="Name"><input name="credits" placeholder="Credits"><input name="total_sessions" placeholder="Total sessions">
+<select name="faculty_id">{% for f in faculties %}<option value="{{ f.faculty_id }}">{{ f.faculty_name }}</option>{% endfor %}</select><button class="btn" style="margin:0">Add</button></form></div>
+<div class="card"><h2>Add class section</h2><form class="row" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="class">
+<input name="code" placeholder="Class code"><input name="name" placeholder="Class name"><input name="semester" placeholder="Semester e.g. 2026-1">
+<select name="course_id">{% for c in courses %}<option value="{{ c.course_id }}">{{ c.course_code }} - {{ c.course_name }}</option>{% endfor %}</select>
+<select name="lecturer_id">{% for l in lecturers %}<option value="{{ l.user_id }}">{{ l.full_name }}</option>{% endfor %}</select><button class="btn" style="margin:0">Add</button></form></div>
+<div class="card table-wrap"><h2>Classes</h2><table><tr><th>Class</th><th>Course</th><th>Semester</th><th>Lecturer</th><th>Students</th><th></th></tr>
+{% for c in classes %}<tr><td>{{ c.class_code }}</td><td>{{ c.course_name }}</td><td>{{ c.semester }}</td><td>{{ c.lecturer_name }}</td><td>{{ c.n_students }}</td><td><a href="{{ url_for('admin.class_page', cid=c.class_id) }}">Manage</a></td></tr>{% endfor %}</table></div>{% endblock %}

@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% block body %}<h1>{{ c.class_code }} - {{ c.course_name }}</h1>
+<div class="card"><h2>Add session</h2><form class="row" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="session">
+<input name="date" type="date"><input name="start" type="time"><input name="end" type="time"><input name="room" placeholder="Room"><button class="btn" style="margin:0">Add</button></form></div>
+<div class="card table-wrap"><h2>Schedule</h2><table><tr><th>Date</th><th>Time</th><th>Room</th></tr>{% for s in sessions %}<tr><td>{{ s.session_date }}</td><td>{{ s.start_time }}-{{ s.end_time }}</td><td>{{ s.room }}</td></tr>{% endfor %}</table></div>
+<div class="card"><h2>Enroll student</h2><form class="row" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="enroll"><input name="student_code" placeholder="Student code"><button class="btn" style="margin:0">Enroll</button></form></div>
+<div class="card table-wrap"><h2>Enrolled students</h2><table><tr><th>Code</th><th>Name</th><th></th></tr>{% for s in students %}<tr><td>{{ s.student_code }}</td><td>{{ s.full_name }}</td><td>
+<form class="inline" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="remove"><input type="hidden" name="student_id" value="{{ s.user_id }}"><button class="btn sm red">Remove</button></form></td></tr>{% endfor %}</table></div>{% endblock %}

@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block body %}<h1>Hello, {{ me.full_name }}</h1>
+<div class="card"><h2>Today's classes</h2>{% for s in today %}<p>{{ s.start_time }}-{{ s.end_time }} &middot; <b>{{ s.class_name }}</b> &middot; Room {{ s.room }}</p>{% else %}<p class="muted">No classes today.</p>{% endfor %}
+<a class="btn" href="{{ url_for('student.scan') }}">Scan QR code</a></div>
+<div class="card"><h2>New notifications</h2>{% for n in notes %}<p>{{ n.message }} <span class="muted">{{ n.created_at }}</span></p>{% else %}<p class="muted">No new notifications.</p>{% endfor %}
+{% if notes %}<form method="post" action="{{ url_for('student.read_notes') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn gray sm">Mark all as read</button></form>{% endif %}</div>{% endblock %}

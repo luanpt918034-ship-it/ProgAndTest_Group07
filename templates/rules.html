@@ -1,0 +1,3 @@
+{% extends 'base.html' %}{% block body %}<div class="card narrow"><h1>Attendance Rules</h1><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label>QR validity (minutes)</label><input name="qr" value="{{ r.qr_valid_minutes }}"><label>Late threshold (minutes)</label><input name="late" value="{{ r.late_threshold_minutes }}">
+<label>Maximum absence rate (%)</label><input name="max" value="{{ r.max_absent_rate }}"><button class="btn">Save rules</button></form></div>{% endblock %}

@@ -1,0 +1,4 @@
+{% extends 'base.html' %}{% block title %}Login{% endblock %}{% block body %}
+<div class="card narrow"><h1>Login</h1><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label>Username</label><input name="username" autofocus><label>Password</label><input name="password" type="password">
+<button class="btn">Login</button> <a href="{{ url_for('auth.forgot') }}">Forgot password?</a></form></div>{% endblock %}

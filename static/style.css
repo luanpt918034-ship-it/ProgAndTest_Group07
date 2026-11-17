@@ -1,0 +1,18 @@
+:root{--b:#1d4ed8;--bg:#f3f5f9;--c:#fff;--t:#1f2937;--m:#6b7280;--ok:#15803d;--er:#b91c1c}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--t)}
+nav{background:var(--b);color:#fff;display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;padding:10px 16px}
+nav a,nav button{color:#fff;text-decoration:none;background:none;border:0;font:inherit;cursor:pointer;padding:4px 0}
+nav .brand{font-weight:700;margin-right:12px}nav .sp{margin-left:auto}nav form{display:inline}
+main{max-width:1000px;margin:18px auto;padding:0 14px}
+.card{background:var(--c);border-radius:10px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px #0001}
+h1{font-size:1.4rem;margin:.2em 0 .6em}h2{font-size:1.1rem;margin:0 0 .6em}
+.flash{padding:10px 14px;border-radius:8px;margin-bottom:10px}.flash.ok{background:#dcfce7;color:var(--ok)}.flash.error{background:#fee2e2;color:var(--er)}
+label{display:block;margin:10px 0 3px;font-weight:600}input,select,textarea{width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}
+.btn,button.btn{display:inline-block;background:var(--b);color:#fff;border:0;border-radius:8px;padding:9px 16px;font:inherit;cursor:pointer;text-decoration:none;margin-top:10px;width:auto}
+.btn.red{background:var(--er)}.btn.gray{background:#64748b}.btn.green{background:var(--ok)}.btn.sm{padding:4px 10px;margin:0}
+.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%}th,td{padding:8px 10px;border-bottom:1px solid #e5e7eb;text-align:left;white-space:nowrap}
+th{background:#eef2ff}.row{display:flex;flex-wrap:wrap;gap:10px}.row>*{flex:1;min-width:140px}.inline{display:inline;margin:0}
+.badge{padding:2px 8px;border-radius:99px;font-size:.8rem;background:#e5e7eb}.PRESENT,.APPROVED{background:#dcfce7}.LATE,.PENDING{background:#fef9c3}
+.ABSENT,.REJECTED{background:#fee2e2}.EXCUSED{background:#dbeafe}.muted{color:var(--m)}.center{text-align:center}
+.narrow{max-width:420px;margin:30px auto}#qrbox{display:flex;justify-content:center;padding:14px}
+@media(max-width:600px){main{margin:10px auto}.row>*{min-width:100%}}

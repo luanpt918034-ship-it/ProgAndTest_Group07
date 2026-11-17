@@ -1,0 +1,14 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Student Attendance System{% endblock %}</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head><body>
+<nav><a class="brand" href="/">Attendance</a>
+{% if me %}
+ {% if me.role=='STUDENT' %}<a href="{{ url_for('student.dashboard') }}">Dashboard</a><a href="{{ url_for('student.courses') }}">My Courses</a><a href="{{ url_for('student.scan') }}">Scan QR</a><a href="{{ url_for('student.history') }}">History</a><a href="{{ url_for('student.absence') }}">Absence</a>
+ {% elif me.role=='LECTURER' %}<a href="{{ url_for('lecturer.dashboard') }}">Dashboard</a><a href="{{ url_for('lecturer.absences') }}">Absence requests</a><a href="{{ url_for('lecturer.report') }}">Reports</a>
+ {% else %}<a href="{{ url_for('admin.users') }}">Accounts</a><a href="{{ url_for('admin.courses') }}">Courses &amp; Classes</a><a href="{{ url_for('admin.rules') }}">Rules</a><a href="{{ url_for('admin.stats') }}">Statistics</a>{% endif %}
+ <span class="sp"></span><a href="{{ url_for('auth.profile') }}">{{ me.full_name }}</a><a href="{{ url_for('auth.change_password') }}">Password</a>
+ <form method="post" action="{{ url_for('auth.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>Logout</button></form>
+{% endif %}</nav><main>
+{% for cat, m in get_flashed_messages(with_categories=true) %}<div class="flash {{ cat }}">{{ m }}</div>{% endfor %}
+{% block body %}{% endblock %}</main><script>document.querySelectorAll('input[type=password]').forEach(function(i){var l=document.createElement('label');l.style.cssText='font-weight:400;margin:4px 0 0;font-size:.9rem';
+l.innerHTML='<input type="checkbox" style="width:auto;margin-right:6px" class="show-pw">Show password';i.insertAdjacentElement('afterend',l);
+l.firstChild.addEventListener('change',function(e){i.type=e.target.checked?'text':'password';});});</script></body></html>

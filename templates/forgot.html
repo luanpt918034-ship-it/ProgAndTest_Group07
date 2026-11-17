@@ -1,0 +1,3 @@
+{% extends 'base.html' %}{% block body %}<div class="card narrow"><h1>Forgot Password</h1><p class="muted">Enter your registered email to receive a reset link.</p>
+<form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Email</label><input name="email" type="email">
+<button class="btn">Send reset link</button> <a href="{{ url_for('auth.login') }}">Back</a></form></div>{% endblock %}

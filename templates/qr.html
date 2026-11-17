@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% block body %}<h1>Attendance Session (QR)</h1><meta http-equiv="refresh" content="15">
+<div class="card center"><p><b>{{ cs.class_name }}</b> &middot; {{ cs.session_date }} {{ cs.start_time }}</p>
+{% if a.is_open %}<div id="qrbox"></div><p>Code: <code id="tok">{{ a.qr_token }}</code></p><p class="muted">Valid until {{ a.expires_at }}</p>
+<form method="post" action="{{ url_for('lecturer.close_session', att_id=a.att_session_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn red">Close attendance</button></form>
+{% else %}<p>This attendance session is not open.</p>{% endif %}</div>
+<div class="card table-wrap"><h2>Checked in</h2><table><tr><th>Code</th><th>Name</th><th>Status</th><th>Time</th></tr>
+{% for r in rows %}<tr><td>{{ r.student_code }}</td><td>{{ r.full_name }}</td><td>{% if r.status %}<span class="badge {{ r.status }}">{{ r.status.title() }}</span>{% else %}<span class="muted">-</span>{% endif %}</td><td>{{ r.check_in_time or '' }}</td></tr>{% endfor %}</table></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>if(window.QRCode&&document.getElementById("qrbox")){new QRCode(document.getElementById("qrbox"),{text:"{{ a.qr_token }}",width:240,height:240});}</script>{% endblock %}

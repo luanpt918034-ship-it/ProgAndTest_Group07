@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block body %}<div class="card narrow"><h1>{{ 'Edit' if u else 'Add' }} Account</h1><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% if not u %}<label>Role</label><select name="role"><option value="STUDENT">Student</option><option value="LECTURER">Lecturer</option></select><label>Username</label><input name="username"><label>Initial password</label><input name="password" type="password">
+<label>Student / Lecturer code</label><input name="code"><label>Major (students)</label><input name="major"><label>Date of birth (students)</label><input name="dob" type="date">{% endif %}
+<label>Full name</label><input name="full_name" value="{{ u.full_name if u }}"><label>Email</label><input name="email" value="{{ u.email if u }}"><label>Phone</label><input name="phone" value="{{ u.phone if u }}">
+<button class="btn">Save</button> <a class="btn gray" href="{{ url_for('admin.users') }}">Cancel</a></form></div>{% endblock %}

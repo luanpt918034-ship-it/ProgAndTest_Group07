@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% block body %}<h1>{{ title }}</h1>
+<form class="card row" method="get">{% if faculties %}<select name="faculty_id"><option value="">All faculties</option>{% for x in faculties %}<option value="{{ x.faculty_id }}" {{ 'selected' if f.faculty_id==x.faculty_id }}>{{ x.faculty_name }}</option>{% endfor %}</select>
+<select name="course_id"><option value="">All courses</option>{% for x in courses %}<option value="{{ x.course_id }}" {{ 'selected' if f.course_id==x.course_id }}>{{ x.course_code }}</option>{% endfor %}</select>{% endif %}
+<select name="class_id"><option value="">All classes</option>{% for x in classes %}<option value="{{ x.class_id }}" {{ 'selected' if f.class_id==x.class_id }}>{{ x.class_code }}</option>{% endfor %}</select>
+<input name="q" placeholder="Search name or student code" value="{{ f.keyword }}"><button class="btn" style="margin:0">Filter</button></form>
+<div class="card table-wrap"><p><a class="btn sm" href="{{ url_for(export_ep, fmt='xlsx', **request.args) }}">Export Excel</a> <a class="btn sm gray" href="{{ url_for(export_ep, fmt='pdf', **request.args) }}">Export PDF</a></p>
+<table><tr><th>Class</th><th>Course</th><th>Code</th><th>Name</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Absence %</th></tr>
+{% for r in rows %}<tr><td>{{ r.class_code }}</td><td>{{ r.course_name }}</td><td>{{ r.student_code }}</td><td>{{ r.full_name }}</td><td>{{ r.present }}</td><td>{{ r.late }}</td><td>{{ r.absent }}</td><td>{{ r.excused }}</td><td>{{ r.rate }}</td></tr>{% else %}<tr><td colspan="9" class="muted">No data.</td></tr>{% endfor %}</table></div>{% endblock %}

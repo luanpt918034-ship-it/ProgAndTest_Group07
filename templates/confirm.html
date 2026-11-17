@@ -1,0 +1,4 @@
+{% extends 'base.html' %}{% block body %}<div class="card narrow"><h1>{{ action.title() }} Account</h1>
+<p>Are you sure you want to {{ action }} the account <b>{{ u.username }}</b> ({{ u.full_name }})?</p>
+<form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn {{ 'red' if action=='lock' else 'green' }}">Yes, {{ action }}</button>
+<a class="btn gray" href="{{ url_for('admin.users') }}">Cancel</a></form></div>{% endblock %}
