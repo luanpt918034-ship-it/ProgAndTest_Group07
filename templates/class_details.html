@@ -1,8 +1,73 @@
-{% extends 'base.html' %}{% block body %}<h1>{{ c.class_code }} - {{ c.course_name }}</h1><p class="muted">{{ c.semester }} &middot; {{ c.n_students }} students &middot; <a href="{{ url_for('lecturer.report', class_id=c.class_id) }}">Attendance report</a></p>
-<div class="card table-wrap"><h2>Sessions</h2><table><tr><th>Date</th><th>Time</th><th>Room</th><th>Attendance</th><th></th></tr>
-{% for s in sessions %}<tr><td>{{ s.session_date }}</td><td>{{ s.start_time }}-{{ s.end_time }}</td><td>{{ s.room }}</td>
-<td>{% if s.closed_at %}Closed{% elif s.is_open %}Open{% else %}Not opened{% endif %}</td><td>
-{% if s.closed_at %}{% elif s.is_open %}<a class="btn sm" href="{{ url_for('lecturer.qr', att_id=s.att_session_id) }}">Show QR</a>{% else %}
-<form class="inline" method="post" action="{{ url_for('lecturer.open_session', csid=s.class_session_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn sm">Open attendance</button></form>{% endif %}
-<a class="btn sm gray" href="{{ url_for('lecturer.manual', csid=s.class_session_id) }}">Manual</a></td></tr>{% else %}<tr><td colspan="5" class="muted">No sessions scheduled.</td></tr>{% endfor %}</table></div>
-<div class="card table-wrap"><h2>Students</h2><table><tr><th>Code</th><th>Name</th></tr>{% for s in students %}<tr><td>{{ s.student_code }}</td><td>{{ s.full_name }}</td></tr>{% endfor %}</table></div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Class Details{% endblock %}
+{% block body %}
+  <div class="page-header role-page-header">
+    <div>
+      <h1>Class Details</h1>
+      <p>Class sessions and attendance options for the selected class.</p>
+    </div>
+    <a class="btn sm gray" href="{{ url_for('lecturer.dashboard') }}#assigned-classes">Back to My Classes</a>
+  </div>
+
+  <section class="card role-panel class-overview-panel">
+    <div class="role-panel-heading"><div><h2>{{ c.course_name }} – {{ c.class_code }}</h2><p>Class overview</p></div><span class="role-count-chip">{{ c.n_students }} students</span></div>
+    <div class="role-fact-grid">
+      <div><span>Course</span><strong>{{ c.course_name }} ({{ c.course_code }})</strong></div>
+      <div><span>Class section</span><strong>{{ c.class_code }}</strong></div>
+      <div><span>Semester</span><strong>{{ c.semester }}</strong></div>
+      <div><span>Enrolled students</span><strong>{{ c.n_students }}</strong></div>
+    </div>
+  </section>
+
+  <section class="card role-panel">
+    <div class="role-panel-heading">
+      <div><h2>Class sessions</h2><p>Open QR attendance, record attendance manually or review the report.</p></div>
+      <a class="btn sm gray" href="{{ url_for('lecturer.report', class_id=c.class_id) }}">Class report</a>
+    </div>
+    <div class="table-wrap">
+      <table class="role-data-table">
+        <thead><tr><th>Session date</th><th>Date and time</th><th>Room</th><th>Attendance status</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for s in sessions %}
+            <tr>
+              <td><strong>{{ s.session_date }}</strong></td>
+              <td>{{ s.start_time }} – {{ s.end_time }}</td>
+              <td>{{ s.room or '—' }}</td>
+              <td>
+                {% if s.closed_at %}<span class="badge ABSENT">Completed</span>
+                {% elif s.is_open %}<span class="badge PRESENT">QR session open</span>
+                {% else %}<span class="badge INFO">Scheduled</span>{% endif %}
+              </td>
+              <td class="role-actions-cell">
+                {% if s.is_open and not s.closed_at %}
+                  <a class="btn sm" href="{{ url_for('lecturer.qr', att_id=s.att_session_id) }}">View QR</a>
+                {% elif not s.closed_at %}
+                  <form class="inline" method="post" action="{{ url_for('lecturer.open_session', csid=s.class_session_id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn sm" type="submit">Open session</button>
+                  </form>
+                {% endif %}
+                <a class="btn sm gray" href="{{ url_for('lecturer.manual', csid=s.class_session_id) }}">Manual attendance</a>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="role-empty-cell">No sessions are scheduled for this class.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card role-panel">
+    <div class="role-panel-heading"><div><h2>Enrolled students</h2><p>Students currently registered in this class.</p></div><span class="role-count-chip">{{ students|length }} student(s)</span></div>
+    <div class="table-wrap">
+      <table class="role-data-table">
+        <thead><tr><th>Student ID</th><th>Student name</th></tr></thead>
+        <tbody>
+          {% for s in students %}<tr><td><strong>{{ s.student_code }}</strong></td><td>{{ s.full_name }}</td></tr>
+          {% else %}<tr><td colspan="2" class="role-empty-cell">No students are enrolled in this class.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

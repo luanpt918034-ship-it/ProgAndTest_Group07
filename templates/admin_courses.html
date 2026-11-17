@@ -1,11 +1,47 @@
-{% extends 'base.html' %}{% block body %}<h1>Courses and Classes</h1>
-<div class="card"><h2>Add faculty</h2><form class="row" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="faculty"><input name="name" placeholder="Faculty name"><button class="btn" style="margin:0">Add</button></form></div>
-<div class="card"><h2>Add course</h2><form class="row" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="course">
-<input name="code" placeholder="Code"><input name="name" placeholder="Name"><input name="credits" placeholder="Credits"><input name="total_sessions" placeholder="Total sessions">
-<select name="faculty_id">{% for f in faculties %}<option value="{{ f.faculty_id }}">{{ f.faculty_name }}</option>{% endfor %}</select><button class="btn" style="margin:0">Add</button></form></div>
-<div class="card"><h2>Add class section</h2><form class="row" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="class">
-<input name="code" placeholder="Class code"><input name="name" placeholder="Class name"><input name="semester" placeholder="Semester e.g. 2026-1">
-<select name="course_id">{% for c in courses %}<option value="{{ c.course_id }}">{{ c.course_code }} - {{ c.course_name }}</option>{% endfor %}</select>
-<select name="lecturer_id">{% for l in lecturers %}<option value="{{ l.user_id }}">{{ l.full_name }}</option>{% endfor %}</select><button class="btn" style="margin:0">Add</button></form></div>
-<div class="card table-wrap"><h2>Classes</h2><table><tr><th>Class</th><th>Course</th><th>Semester</th><th>Lecturer</th><th>Students</th><th></th></tr>
-{% for c in classes %}<tr><td>{{ c.class_code }}</td><td>{{ c.course_name }}</td><td>{{ c.semester }}</td><td>{{ c.lecturer_name }}</td><td>{{ c.n_students }}</td><td><a href="{{ url_for('admin.class_page', cid=c.class_id) }}">Manage</a></td></tr>{% endfor %}</table></div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Courses & Classes{% endblock %}
+{% block body %}
+  <div class="page-header role-page-header"><div><h1>Courses & Classes</h1><p>Manage faculties, courses, class sections and student schedules.</p></div></div>
+
+  <div class="admin-course-layout">
+    <section class="card role-panel">
+      <div class="role-panel-heading"><div><h2>Course list</h2><p>Courses currently registered in the system.</p></div><span class="role-count-chip">{{ courses|length }} course(s)</span></div>
+      <div class="table-wrap"><table class="role-data-table"><thead><tr><th>Course code</th><th>Course name</th><th>Faculty</th><th>Credits</th></tr></thead><tbody>
+        {% for c in courses %}<tr><td><strong>{{ c.course_code }}</strong></td><td>{{ c.course_name }}</td><td>{{ c.faculty_name }}</td><td>{{ c.credits }}</td></tr>{% else %}<tr><td colspan="4" class="role-empty-cell">No courses have been created.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+
+    <section class="card role-panel">
+      <div class="role-panel-heading"><div><h2>Add course</h2><p>Create a course and assign it to a faculty.</p></div></div>
+      <form method="post" class="admin-course-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="course">
+        <div class="admin-form-grid"><div><label for="course-code">Course code</label><input id="course-code" name="code" placeholder="e.g. SE101" required></div><div><label for="course-credits">Credits</label><input id="course-credits" name="credits" type="number" min="1" placeholder="3" required></div>
+        <div class="admin-form-span"><label for="course-name">Course name</label><input id="course-name" name="name" placeholder="Software Engineering" required></div>
+        <div><label for="course-sessions">Total sessions</label><input id="course-sessions" name="total_sessions" type="number" min="1" placeholder="15" required></div>
+        <div><label for="course-faculty">Faculty</label><select id="course-faculty" name="faculty_id" required>{% for f in faculties %}<option value="{{ f.faculty_id }}">{{ f.faculty_name }}</option>{% else %}<option value="">Create a faculty first</option>{% endfor %}</select></div></div>
+        <button class="btn" type="submit">Save course</button>
+      </form>
+      <details class="admin-inline-details"><summary>Add faculty</summary><form method="post" class="admin-inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="faculty"><input name="name" placeholder="Faculty name" required><button class="btn sm gray" type="submit">Add faculty</button></form></details>
+    </section>
+
+    <section class="card role-panel">
+      <div class="role-panel-heading"><div><h2>Create class section</h2><p>Assign a course and lecturer to a new class section.</p></div></div>
+      <form method="post" class="admin-course-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="kind" value="class">
+        <div class="admin-form-grid"><div><label for="class-course">Course</label><select id="class-course" name="course_id" required>{% for c in courses %}<option value="{{ c.course_id }}">{{ c.course_code }} · {{ c.course_name }}</option>{% endfor %}</select></div>
+        <div><label for="class-lecturer">Lecturer</label><select id="class-lecturer" name="lecturer_id" required>{% for l in lecturers %}<option value="{{ l.user_id }}">{{ l.full_name }} · {{ l.lecturer_code }}</option>{% endfor %}</select></div>
+        <div><label for="class-code">Class section code</label><input id="class-code" name="code" placeholder="SE101.01" required></div>
+        <div><label for="class-semester">Semester / year</label><input id="class-semester" name="semester" placeholder="2026-1" required></div>
+        <div class="admin-form-span"><label for="class-name">Class name</label><input id="class-name" name="name" placeholder="Software Engineering - Group 1" required></div></div>
+        <button class="btn" type="submit">Create class</button>
+      </form>
+    </section>
+
+    <section class="card role-panel">
+      <div class="role-panel-heading"><div><h2>Class sections</h2><p>Open a class to add its schedule and manage enrollment.</p></div><span class="role-count-chip">{{ classes|length }} class(es)</span></div>
+      <div class="table-wrap"><table class="role-data-table"><thead><tr><th>Class section</th><th>Course</th><th>Lecturer</th><th>Students</th><th></th></tr></thead><tbody>
+        {% for c in classes %}<tr><td><strong>{{ c.class_code }}</strong><small class="role-cell-sub">{{ c.semester }}</small></td><td>{{ c.course_name }}</td><td>{{ c.lecturer_name }}</td><td>{{ c.n_students }}</td><td><a class="btn sm gray" href="{{ url_for('admin.class_page', cid=c.class_id) }}">Manage</a></td></tr>{% else %}<tr><td colspan="5" class="role-empty-cell">No class sections have been created.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+  </div>
+{% endblock %}

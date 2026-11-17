@@ -1,5 +1,72 @@
-{% extends 'base.html' %}{% block body %}<h1>Hello, {{ me.full_name }}</h1>
-<div class="card"><h2>Today's classes</h2>{% for s in today %}<p>{{ s.start_time }}-{{ s.end_time }} &middot; <b>{{ s.class_name }}</b> &middot; Room {{ s.room }}</p>{% else %}<p class="muted">No classes today.</p>{% endfor %}
-<a class="btn" href="{{ url_for('student.scan') }}">Scan QR code</a></div>
-<div class="card"><h2>New notifications</h2>{% for n in notes %}<p>{{ n.message }} <span class="muted">{{ n.created_at }}</span></p>{% else %}<p class="muted">No new notifications.</p>{% endfor %}
-{% if notes %}<form method="post" action="{{ url_for('student.read_notes') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn gray sm">Mark all as read</button></form>{% endif %}</div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Student Dashboard{% endblock %}
+{% block body %}
+  <div class="page-header dashboard-page-heading">
+    <div>
+      <h1>Student Dashboard</h1>
+      <p>Your classes and attendance at a glance.</p>
+    </div>
+  </div>
+
+  <section class="card dashboard-classes-card" aria-labelledby="today-classes-title">
+    <div class="card-header dashboard-card-heading">
+      <div>
+        <h2 id="today-classes-title">Today’s classes</h2>
+        <p>Classes scheduled for today</p>
+      </div>
+      <a class="btn dashboard-scan-button" href="{{ url_for('student.scan') }}">SCAN QR CODE</a>
+    </div>
+
+    <div class="table-wrap">
+      <table class="dashboard-classes-table">
+        <thead>
+          <tr>
+            <th scope="col">Course</th>
+            <th scope="col">Class section</th>
+            <th scope="col">Time</th>
+            <th scope="col">Room</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in today %}
+            <tr>
+              <td><strong>{{ s.course_name }}</strong></td>
+              <td>{{ s.class_code }}</td>
+              <td>{{ s.start_time }} – {{ s.end_time }}</td>
+              <td>{{ s.room or '—' }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="4" class="dashboard-empty-state">No classes scheduled for today.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card dashboard-notifications-card" aria-labelledby="notifications-title">
+    <div class="card-header dashboard-notifications-heading">
+      <div>
+        <h2 id="notifications-title">New notifications</h2>
+      </div>
+      {% if notes %}
+        <form class="inline" method="post" action="{{ url_for('student.read_notes') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn sm gray" type="submit">Mark all as read</button>
+        </form>
+      {% endif %}
+    </div>
+
+    <div class="notification-list">
+      {% for n in notes %}
+        <article class="notification-item">
+          <p>{{ n.message }}</p>
+          {% if n.created_at %}<time datetime="{{ n.created_at }}">{{ n.created_at }}</time>{% endif %}
+        </article>
+      {% else %}
+        <p class="muted dashboard-empty-notification">No new notifications.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

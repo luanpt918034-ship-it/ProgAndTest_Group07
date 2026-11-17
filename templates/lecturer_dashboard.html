@@ -1,6 +1,83 @@
-{% extends 'base.html' %}{% block body %}<h1>Lecturer Dashboard</h1>
-<div class="card"><h2>Today's sessions</h2>{% for s in today %}<p>{{ s.start_time }}-{{ s.end_time }} &middot; <b>{{ s.class_name }}</b> &middot; Room {{ s.room }}
-<form class="inline" method="post" action="{{ url_for('lecturer.open_session', csid=s.class_session_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn sm">Open attendance</button></form></p>{% else %}<p class="muted">No sessions today.</p>{% endfor %}</div>
-<div class="card"><h2>Pending absence requests: {{ pending }}</h2><a class="btn sm" href="{{ url_for('lecturer.absences') }}">Review</a></div>
-<div class="card table-wrap"><h2>My classes</h2><table><tr><th>Class</th><th>Course</th><th>Semester</th><th>Students</th><th></th></tr>
-{% for c in classes %}<tr><td>{{ c.class_code }}</td><td>{{ c.course_name }}</td><td>{{ c.semester }}</td><td>{{ c.n_students }}</td><td><a href="{{ url_for('lecturer.class_details', class_id=c.class_id) }}">Details</a></td></tr>{% else %}<tr><td colspan="5" class="muted">No classes assigned.</td></tr>{% endfor %}</table></div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Lecturer Dashboard{% endblock %}
+{% block body %}
+  <div class="page-header role-page-header">
+    <div>
+      <h1>Lecturer Dashboard</h1>
+      <p>View your assigned classes, today's sessions and pending absence requests.</p>
+    </div>
+  </div>
+
+  <section class="card role-panel lecturer-today-panel">
+    <div class="role-panel-heading">
+      <div>
+        <h2>Today's classes</h2>
+        <p>Scheduled sessions for today</p>
+      </div>
+      <span class="role-count-chip">{{ today|length }} session(s)</span>
+    </div>
+    <div class="table-wrap">
+      <table class="role-data-table">
+        <thead>
+          <tr><th>Course</th><th>Class section</th><th>Today's session</th><th>Status</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          {% for s in today %}
+            {% set class_info = (classes|selectattr('class_id', 'equalto', s.class_id)|list|first) %}
+            <tr>
+              <td><strong>{{ class_info.course_name if class_info else s.class_name }}</strong></td>
+              <td>{{ class_info.class_code if class_info else s.class_name }}</td>
+              <td>{{ s.start_time }} – {{ s.end_time }} <span class="muted">· {{ s.room or 'Room TBA' }}</span></td>
+              <td><span class="badge INFO">Scheduled</span></td>
+              <td>
+                <form class="inline" method="post" action="{{ url_for('lecturer.open_session', csid=s.class_session_id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn sm" type="submit">Open session</button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="role-empty-cell">No classes are scheduled for today.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card role-panel" id="assigned-classes">
+    <div class="role-panel-heading">
+      <div>
+        <h2>Assigned classes</h2>
+        <p>Classes and sections assigned to your account</p>
+      </div>
+      <span class="role-count-chip">{{ classes|length }} class(es)</span>
+    </div>
+    <div class="table-wrap">
+      <table class="role-data-table">
+        <thead><tr><th>Course</th><th>Class section</th><th>Semester</th><th>Students</th><th></th></tr></thead>
+        <tbody>
+          {% for c in classes %}
+            <tr>
+              <td><strong>{{ c.course_name }}</strong><small class="role-cell-sub">{{ c.course_code }}</small></td>
+              <td>{{ c.class_code }}</td>
+              <td>{{ c.semester }}</td>
+              <td>{{ c.n_students }}</td>
+              <td><a class="btn sm gray" href="{{ url_for('lecturer.class_details', class_id=c.class_id) }}">View class</a></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="role-empty-cell">No classes have been assigned yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card role-pending-strip">
+    <div>
+      <h2>Pending absence requests</h2>
+      <p>Student requests waiting for your review</p>
+    </div>
+    <span class="role-pending-count">{{ pending }}</span>
+    <a class="btn sm" href="{{ url_for('lecturer.absences') }}">Review requests</a>
+  </section>
+{% endblock %}

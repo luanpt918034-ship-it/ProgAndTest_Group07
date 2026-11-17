@@ -1,14 +1,164 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{% block title %}Student Attendance System{% endblock %}</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head><body>
-<nav><a class="brand" href="/">Attendance</a>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}Student Attendance System{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="{{ 'auth-body' if not me else ('app-role-' ~ me.role|lower) }}">
 {% if me %}
- {% if me.role=='STUDENT' %}<a href="{{ url_for('student.dashboard') }}">Dashboard</a><a href="{{ url_for('student.courses') }}">My Courses</a><a href="{{ url_for('student.scan') }}">Scan QR</a><a href="{{ url_for('student.history') }}">History</a><a href="{{ url_for('student.absence') }}">Absence</a>
- {% elif me.role=='LECTURER' %}<a href="{{ url_for('lecturer.dashboard') }}">Dashboard</a><a href="{{ url_for('lecturer.absences') }}">Absence requests</a><a href="{{ url_for('lecturer.report') }}">Reports</a>
- {% else %}<a href="{{ url_for('admin.users') }}">Accounts</a><a href="{{ url_for('admin.courses') }}">Courses &amp; Classes</a><a href="{{ url_for('admin.rules') }}">Rules</a><a href="{{ url_for('admin.stats') }}">Statistics</a>{% endif %}
- <span class="sp"></span><a href="{{ url_for('auth.profile') }}">{{ me.full_name }}</a><a href="{{ url_for('auth.change_password') }}">Password</a>
- <form method="post" action="{{ url_for('auth.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>Logout</button></form>
-{% endif %}</nav><main>
-{% for cat, m in get_flashed_messages(with_categories=true) %}<div class="flash {{ cat }}">{{ m }}</div>{% endfor %}
-{% block body %}{% endblock %}</main><script>document.querySelectorAll('input[type=password]').forEach(function(i){var l=document.createElement('label');l.style.cssText='font-weight:400;margin:4px 0 0;font-size:.9rem';
-l.innerHTML='<input type="checkbox" style="width:auto;margin-right:6px" class="show-pw">Show password';i.insertAdjacentElement('afterend',l);
-l.firstChild.addEventListener('change',function(e){i.type=e.target.checked?'text':'password';});});</script></body></html>
+  {% set ep = request.endpoint or '' %}
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
+  <div class="app-layout">
+    <aside class="sidebar" id="appSidebar">
+      <a class="sidebar-brand" href="/" aria-label="Attendance home">
+        <div class="brand-icon" aria-hidden="true">A</div>
+        <div class="brand-text">
+          <strong>{{ me.role.title() }}</strong>
+          <span>ATTENDANCE</span>
+        </div>
+      </a>
+
+      <nav class="sidebar-nav">
+        {% if me.role == 'STUDENT' %}
+          <a class="sidebar-link {{ 'active' if ep == 'student.dashboard' }}" href="{{ url_for('student.dashboard') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+            Dashboard
+          </a>
+          <a class="sidebar-link {{ 'active' if ep == 'student.courses' }}" href="{{ url_for('student.courses') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            My Courses
+          </a>
+          <a class="sidebar-link {{ 'active' if ep == 'student.scan' }}" href="{{ url_for('student.scan') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+            QR Attendance
+          </a>
+          <a class="sidebar-link {{ 'active' if ep == 'student.history' }}" href="{{ url_for('student.history') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Attendance History
+          </a>
+          <a class="sidebar-link {{ 'active' if ep == 'student.absence' }}" href="{{ url_for('student.absence') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Absence Request
+          </a>
+        {% elif me.role == 'LECTURER' %}
+          <a class="sidebar-link {{ 'active' if ep == 'lecturer.dashboard' }}" href="{{ url_for('lecturer.dashboard') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+            Dashboard
+          </a>
+          <a class="sidebar-link {{ 'active' if ep in ('lecturer.class_details', 'lecturer.qr', 'lecturer.manual') }}" href="{{ url_for('lecturer.dashboard') }}#assigned-classes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            My Classes
+          </a>
+          <a class="sidebar-link {{ 'active' if ep == 'lecturer.absences' }}" href="{{ url_for('lecturer.absences') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Absence Requests
+          </a>
+          <a class="sidebar-link {{ 'active' if ep == 'lecturer.report' }}" href="{{ url_for('lecturer.report') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Class Reports
+          </a>
+        {% else %}
+          <a class="sidebar-link {{ 'active' if ep in ('admin.users', 'admin.new_user', 'admin.edit_user', 'admin.lock') }}" href="{{ url_for('admin.users') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            User Accounts
+          </a>
+          <a class="sidebar-link {{ 'active' if ep in ('admin.courses', 'admin.class_page') }}" href="{{ url_for('admin.courses') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            Courses &amp; Classes
+          </a>
+          <a class="sidebar-link {{ 'active' if ep == 'admin.rules' }}" href="{{ url_for('admin.rules') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Attendance Rules
+          </a>
+          <a class="sidebar-link {{ 'active' if ep == 'admin.stats' }}" href="{{ url_for('admin.stats') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            University Statistics
+          </a>
+        {% endif %}
+
+        <a class="sidebar-link {{ 'active' if ep == 'auth.profile' }}" href="{{ url_for('auth.profile') }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          My Profile
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a class="sidebar-account" href="{{ url_for('auth.profile') }}">
+          <span class="sidebar-avatar">{{ (me.full_name or me.username)[:1].upper() }}</span>
+          <span class="sidebar-account-copy">
+            <strong>{{ me.full_name or me.username }}</strong>
+            <small>{{ me.role.title() }}</small>
+          </span>
+        </a>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="logout-btn" type="submit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign Out
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="menu-toggle" onclick="toggleSidebar(true)" aria-label="Open menu">&#9776;</button>
+          <span class="topbar-crumb">{{ me.role.title() }} Portal</span>
+        </div>
+        <div class="topbar-user">
+          <a class="user-pill" href="{{ url_for('auth.profile') }}">
+            <span class="avatar-circle">{{ (me.full_name or me.username)[:1].upper() }}</span>
+            <span>{{ me.full_name }}</span>
+            <span class="role-chip">{{ me.role }}</span>
+          </a>
+        </div>
+      </header>
+
+      <main class="workspace">
+        {% for cat, m in get_flashed_messages(with_categories=true) %}
+          <div class="flash {{ cat }}">{{ m }}</div>
+        {% endfor %}
+        {% block body %}{% endblock %}
+      </main>
+    </div>
+  </div>
+{% else %}
+  <div class="auth-wrapper">
+    <div class="auth-crest" aria-hidden="true">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+      </svg>
+    </div>
+    <div class="auth-card">
+      {% for cat, m in get_flashed_messages(with_categories=true) %}
+        <div class="flash {{ cat }}">{{ m }}</div>
+      {% endfor %}
+      {% block auth_body %}{% endblock %}
+    </div>
+  </div>
+{% endif %}
+
+<script>
+function toggleSidebar(open) {
+  var sb = document.getElementById('appSidebar');
+  var ov = document.getElementById('sidebarOverlay');
+  if (sb && ov) {
+    sb.classList.toggle('open', open);
+    ov.classList.toggle('open', open);
+  }
+}
+document.querySelectorAll('input[type=password]').forEach(function(i) {
+  var l = document.createElement('label');
+  l.style.cssText = 'display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:6px 0 2px;font-size:.86rem;color:#66758A;cursor:pointer';
+  l.innerHTML = '<input type="checkbox" style="width:auto;margin:0" class="show-pw">' + (i.getAttribute('data-toggle-label') || 'Show password');
+  i.insertAdjacentElement('afterend', l);
+  l.firstChild.addEventListener('change', function(e) {
+    i.type = e.target.checked ? 'text' : 'password';
+  });
+});
+</script>
+</body>
+</html>

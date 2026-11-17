@@ -1,3 +1,15 @@
-{% extends 'base.html' %}{% block body %}<div class="card narrow"><h1>Attendance Rules</h1><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-<label>QR validity (minutes)</label><input name="qr" value="{{ r.qr_valid_minutes }}"><label>Late threshold (minutes)</label><input name="late" value="{{ r.late_threshold_minutes }}">
-<label>Maximum absence rate (%)</label><input name="max" value="{{ r.max_absent_rate }}"><button class="btn">Save rules</button></form></div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Attendance Rules{% endblock %}
+{% block body %}
+  <div class="page-header role-page-header"><div><h1>Attendance Rules</h1><p>Configure QR session validity and attendance thresholds for the system.</p></div></div>
+  <section class="card role-panel admin-rules-panel">
+    <div class="role-panel-heading"><div><h2>Attendance configuration</h2><p>These settings are used when creating QR sessions and evaluating attendance records.</p></div></div>
+    <form method="post" class="admin-rules-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="admin-rule-row"><div><label for="rule-qr">QR code validity</label><p>How long an opened QR attendance session remains valid.</p></div><div class="admin-rule-control"><input id="rule-qr" name="qr" type="number" min="1" value="{{ r.qr_valid_minutes }}" required><span>minutes</span></div></div>
+      <div class="admin-rule-row"><div><label for="rule-late">Late threshold</label><p>Check-ins after this time are marked as late.</p></div><div class="admin-rule-control"><input id="rule-late" name="late" type="number" min="0" value="{{ r.late_threshold_minutes }}" required><span>minutes after class start</span></div></div>
+      <div class="admin-rule-row"><div><label for="rule-max">Maximum absence threshold</label><p>Absence rate used by the system to trigger attendance alerts.</p></div><div class="admin-rule-control"><input id="rule-max" name="max" type="number" min="0" max="100" step="0.1" value="{{ r.max_absent_rate }}" required><span>percent of total sessions</span></div></div>
+      <div class="admin-rules-footer"><button class="btn" type="submit">Save rules</button><span class="muted">Changes apply to newly evaluated attendance activity.</span></div>
+    </form>
+  </section>
+{% endblock %}

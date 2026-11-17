@@ -1,5 +1,23 @@
-{% extends 'base.html' %}{% block body %}<div class="card narrow"><h1>{{ 'Edit' if u else 'Add' }} Account</h1><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-{% if not u %}<label>Role</label><select name="role"><option value="STUDENT">Student</option><option value="LECTURER">Lecturer</option></select><label>Username</label><input name="username"><label>Initial password</label><input name="password" type="password">
-<label>Student / Lecturer code</label><input name="code"><label>Major (students)</label><input name="major"><label>Date of birth (students)</label><input name="dob" type="date">{% endif %}
-<label>Full name</label><input name="full_name" value="{{ u.full_name if u }}"><label>Email</label><input name="email" value="{{ u.email if u }}"><label>Phone</label><input name="phone" value="{{ u.phone if u }}">
-<button class="btn">Save</button> <a class="btn gray" href="{{ url_for('admin.users') }}">Cancel</a></form></div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit' if u else 'Add' }} Account{% endblock %}
+{% block body %}
+  <div class="page-modal-backdrop">
+    <section class="page-modal-card role-panel">
+      <div class="page-modal-heading"><div><h1>{{ 'Edit account' if u else 'Add account' }}</h1><p>{{ 'Update the account contact details.' if u else 'Create a student or lecturer account.' }}</p></div><a class="modal-close-link" href="{{ url_for('admin.users') }}" aria-label="Close">×</a></div>
+      <form method="post" class="admin-modal-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% if not u %}
+          <label for="new-role">Role</label><select id="new-role" name="role"><option value="STUDENT">Student</option><option value="LECTURER">Lecturer</option></select>
+          <label for="new-username">Username</label><input id="new-username" name="username" required>
+          <label for="new-password">Initial password</label><input id="new-password" name="password" type="password" required>
+          <label for="new-code">Student / Lecturer ID</label><input id="new-code" name="code" required>
+          <div class="admin-form-grid"><div><label for="new-major">Major (students)</label><input id="new-major" name="major"></div><div><label for="new-dob">Date of birth (students)</label><input id="new-dob" name="dob" type="date"></div></div>
+        {% endif %}
+        <label for="account-fullname">Full name</label><input id="account-fullname" name="full_name" value="{{ u.full_name if u }}" required>
+        <label for="account-email">Email</label><input id="account-email" name="email" type="email" value="{{ u.email if u }}" required>
+        <label for="account-phone">Phone</label><input id="account-phone" name="phone" value="{{ u.phone if u }}">
+        <div class="page-modal-actions"><a class="btn gray" href="{{ url_for('admin.users') }}">Cancel</a><button class="btn" type="submit">Save account</button></div>
+      </form>
+    </section>
+  </div>
+{% endblock %}

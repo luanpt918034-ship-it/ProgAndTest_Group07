@@ -1,3 +1,39 @@
-{% extends 'base.html' %}{% block body %}<div class="card narrow"><h1>My Profile</h1><p class="muted">Username: {{ u.username }} &middot; Role: {{ u.role.title() }}</p>
-<form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Full name</label><input name="full_name" value="{{ u.full_name }}">
-<label>Email</label><input name="email" value="{{ u.email }}"><label>Phone</label><input name="phone" value="{{ u.phone }}"><button class="btn">Save</button></form></div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block body %}
+  <div class="page-header">
+    <div>
+      <h1>My Profile</h1>
+      <p>Manage your personal contact details and account information.</p>
+    </div>
+    <a class="btn gray sm" href="{{ url_for('auth.change_password') }}">Change Password</a>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><h2>Account Overview</h2></div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div class="avatar-circle" style="width:54px;height:54px;font-size:1.3rem">{{ (u.full_name or u.username)[:1].upper() }}</div>
+        <div>
+          <div style="font-weight:750;font-size:1.1rem">{{ u.full_name }}</div>
+          <div class="muted">Username: <strong>{{ u.username }}</strong> &middot; <span class="badge INFO">{{ u.role.title() }}</span></div>
+        </div>
+      </div>
+      <p class="muted" style="margin:0">Keep your email address up to date to receive password reset links and attendance notifications.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>Edit Contact Information</h2></div>
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Full name</label>
+        <input name="full_name" value="{{ u.full_name }}">
+        <label>Email</label>
+        <input name="email" value="{{ u.email }}">
+        <label>Phone</label>
+        <input name="phone" value="{{ u.phone }}">
+        <button class="btn" type="submit">Save Changes</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

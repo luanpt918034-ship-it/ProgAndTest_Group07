@@ -1,8 +1,33 @@
-{% extends 'base.html' %}{% block body %}<h1>User Accounts</h1>
-<form class="card row" method="get"><input name="q" placeholder="Search username, name or email" value="{{ q }}"><select name="role"><option value="">All roles</option><option value="STUDENT" {{ 'selected' if role=='STUDENT' }}>Student</option><option value="LECTURER" {{ 'selected' if role=='LECTURER' }}>Lecturer</option></select><button class="btn" style="margin:0">Search</button></form>
-<div class="card"><a class="btn sm" href="{{ url_for('admin.new_user') }}">+ Add account</a>
-<form class="inline" method="post" action="{{ url_for('admin.import_students') }}" enctype="multipart/form-data"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="file" name="file" accept=".xlsx" style="width:auto"><button class="btn sm gray">Import students (.xlsx)</button></form>
-<p class="muted">Excel columns: username, full_name, email, student_code, major (optional). Initial password = student code + @123.</p></div>
-<div class="card table-wrap"><table><tr><th>Username</th><th>Name</th><th>Role</th><th>Code</th><th>Email</th><th>Status</th><th></th></tr>
-{% for u in users %}<tr><td>{{ u.username }}</td><td>{{ u.full_name }}</td><td>{{ u.role.title() }}</td><td>{{ u.code }}</td><td>{{ u.email }}</td><td>{{ 'Locked' if u.is_locked else 'Active' }}</td><td>
-<a href="{{ url_for('admin.edit_user', uid=u.user_id) }}">Edit</a>{% if u.role!='ADMIN' %} &middot; {% if u.is_locked %}<a href="{{ url_for('admin.lock', uid=u.user_id, action='unlock') }}">Unlock</a>{% else %}<a href="{{ url_for('admin.lock', uid=u.user_id, action='lock') }}">Lock</a>{% endif %}{% endif %}</td></tr>{% endfor %}</table></div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}User Accounts{% endblock %}
+{% block body %}
+  <div class="page-header role-page-header"><div><h1>User Accounts</h1><p>Manage student and lecturer accounts and access status.</p></div></div>
+
+  <section class="card role-panel admin-account-tools">
+    <div class="role-panel-heading"><div><h2>Account search and actions</h2><p>Find an account or create a new one.</p></div><a class="btn" href="{{ url_for('admin.new_user') }}">Add account</a></div>
+    <form class="admin-account-search" method="get">
+      <div class="admin-search-main"><label for="account-search">Search accounts</label><input id="account-search" name="q" value="{{ q }}" placeholder="Enter name, username or email"></div>
+      <div class="admin-search-role"><label for="account-role">Account role</label><select id="account-role" name="role"><option value="">All roles</option><option value="STUDENT" {{ 'selected' if role == 'STUDENT' }}>Student</option><option value="LECTURER" {{ 'selected' if role == 'LECTURER' }}>Lecturer</option></select></div>
+      <div class="admin-search-actions"><button class="btn" type="submit">Search</button><a class="btn gray" href="{{ request.path }}">Reset</a></div>
+    </form>
+    <details class="admin-import-details"><summary>Batch import students from Excel (.xlsx)</summary>
+      <form class="admin-import-form" method="post" action="{{ url_for('admin.import_students') }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="file" name="file" accept=".xlsx" required><button class="btn sm gray" type="submit">Import students</button>
+      </form>
+      <p class="muted">Columns: username, full_name, email, student_code, major (optional). Initial password: student code + @123.</p>
+    </details>
+  </section>
+
+  <section class="card role-panel admin-accounts-table-panel">
+    <div class="role-panel-heading"><div><h2>Accounts</h2><p>Account details and current access status.</p></div><span class="role-count-chip">{{ users|length }} account(s)</span></div>
+    <div class="table-wrap"><table class="role-data-table"><thead><tr><th>Account ID</th><th>Full name</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>{% for u in users %}<tr>
+        <td><strong>{{ u.code or u.username }}</strong><small class="role-cell-sub">@{{ u.username }}</small></td>
+        <td>{{ u.full_name }}<small class="role-cell-sub">{{ u.email }}</small></td>
+        <td><span class="badge INFO">{{ u.role.title() }}</span></td>
+        <td><span class="badge {{ 'LOCKED' if u.is_locked else 'ACTIVE' }}">{{ 'Locked' if u.is_locked else 'Active' }}</span></td>
+        <td class="role-actions-cell"><a class="btn sm gray" href="{{ url_for('admin.edit_user', uid=u.user_id) }}">Edit</a>{% if u.role != 'ADMIN' %}{% if u.is_locked %}<a class="btn sm green" href="{{ url_for('admin.lock', uid=u.user_id, action='unlock') }}">Unlock</a>{% else %}<a class="btn sm red" href="{{ url_for('admin.lock', uid=u.user_id, action='lock') }}">Lock</a>{% endif %}{% endif %}</td>
+      </tr>{% else %}<tr><td colspan="5" class="role-empty-cell">No accounts match the selected search.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+{% endblock %}
