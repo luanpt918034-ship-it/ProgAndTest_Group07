@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Attendance Session{% endblock %}
+{% block title %}Attendance Session (QR){% endblock %}
 {% block body %}
   <meta http-equiv="refresh" content="15">
   {% set checked_rows = rows|selectattr('status')|list %}
@@ -7,7 +7,7 @@
   {% set total_count = rows|length %}
   {% set progress = (100 * checked_count / total_count) if total_count else 0 %}
   <div class="page-header role-page-header">
-    <div><h1>Attendance Session</h1><p>QR code for the selected class session.</p></div>
+    <div><h1>Attendance Session (QR)</h1><p>QR code for the selected class session.</p></div>
     <a class="btn sm gray" href="{{ url_for('lecturer.class_details', class_id=cs.class_id) }}">Back to Class</a>
   </div>
 
