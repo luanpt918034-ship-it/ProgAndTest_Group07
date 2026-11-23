@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Reset Link Sent{% endblock %}
+{% block auth_body %}
+  <h1>Reset Link Sent</h1>
+  <p class="auth-subtitle">If the email is registered in our system, a password reset link has been sent. The link is valid for 30 minutes.</p>
+  <a class="btn-pill" href="{{ url_for('auth.login') }}">Back to login</a>
+{% endblock %}

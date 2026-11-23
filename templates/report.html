@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block body %}
+  {% if faculties is defined %}
+    {# ADMIN UNIVERSITY STATISTICS #}
+    <div class="page-header role-page-header">
+      <div><h1>University Statistics</h1><p>View attendance statistics by faculty, course or class and export reports.</p></div>
+    </div>
+
+    <form class="card role-panel stats-scope-panel" method="get">
+      <div class="role-panel-heading"><div><h2>Report scope</h2><p>Choose the academic scope to include in the statistics.</p></div></div>
+      <div class="stats-scope-grid">
+        <div><label for="stats-faculty">Faculty</label><select id="stats-faculty" name="faculty_id"><option value="">All faculties</option>{% for x in faculties %}<option value="{{ x.faculty_id }}" {{ 'selected' if f.faculty_id == x.faculty_id }}>{{ x.faculty_name }}</option>{% endfor %}</select></div>
+        <div><label for="stats-course">Course</label><select id="stats-course" name="course_id"><option value="">All courses</option>{% for x in courses %}<option value="{{ x.course_id }}" {{ 'selected' if f.course_id == x.course_id }}>{{ x.course_code }} · {{ x.course_name }}</option>{% endfor %}</select></div>
+        <div><label for="stats-class">Class</label><select id="stats-class" name="class_id"><option value="">All classes</option>{% for x in classes %}<option value="{{ x.class_id }}" {{ 'selected' if f.class_id == x.class_id }}>{{ x.class_code }}</option>{% endfor %}</select></div>
+        <div><label for="stats-search">Search student</label><input id="stats-search" name="q" value="{{ f.keyword }}" placeholder="Student name or ID"></div>
+        <div class="stats-scope-actions"><button class="btn" type="submit">View statistics</button><a class="btn gray" href="{{ request.path }}">Reset</a></div>
+      </div>
+      <p class="stats-scope-note">Statistics are calculated from the attendance records currently stored in the system.</p>
+    </form>
+
+    <section class="card role-panel stats-chart-panel">
+      <div class="role-panel-heading"><div><h2>Attendance rate by faculty</h2><p>Average attendance rate across courses in the selected scope.</p></div></div>
+      {% set chart_state = namespace(has_data=false) %}
+      {% for faculty in faculties %}
+        {% set faculty_state = namespace(absence_total=0, student_total=0) %}
+        {% for course in courses if course.faculty_id == faculty.faculty_id %}
+          {% for record in rows if record.course_name == course.course_name %}
+            {% set faculty_state.absence_total = faculty_state.absence_total + record.rate %}
+            {% set faculty_state.student_total = faculty_state.student_total + 1 %}
+          {% endfor %}
+        {% endfor %}
+        {% if faculty_state.student_total %}
+          {% set chart_state.has_data = true %}
+          {% set attendance_rate = (100 - faculty_state.absence_total / faculty_state.student_total)|round(1) %}
+          <div class="stats-bar-row"><span class="stats-bar-label">{{ faculty.faculty_name }}</span><div class="stats-bar-track"><div class="stats-bar-fill" style="width:{{ [attendance_rate, 100]|min }}%"></div></div><strong class="stats-bar-value">{{ attendance_rate }}%</strong></div>
+        {% endif %}
+      {% endfor %}
+      {% if not chart_state.has_data %}<p class="role-empty-cell">No attendance data is available for this scope.</p>{% endif %}
+    </section>
+
+    <section class="card role-panel stats-warning-panel">
+      <div class="role-panel-heading"><div><h2>Students exceeding absence limit</h2><p>Students with an absence rate above 20%.</p></div></div>
+      <div class="table-wrap"><table class="role-data-table"><thead><tr><th>Student ID</th><th>Student name</th><th>Course / class</th><th>Absence rate</th></tr></thead>
+        <tbody>{% for r in rows if r.rate > 20 %}<tr><td><strong>{{ r.student_code }}</strong></td><td>{{ r.full_name }}</td><td>{{ r.course_name }} · {{ r.class_code }}</td><td><span class="stats-risk-value">{{ r.rate }}%</span><div class="progress-track"><div class="progress-fill danger" style="width:{{ [r.rate, 100]|min }}%"></div></div></td></tr>
+        {% else %}<tr><td colspan="4" class="role-empty-cell">No students are above the 20% absence limit.</td></tr>{% endfor %}</tbody>
+      </table></div>
+    </section>
+
+    <div class="role-export-row"><span class="muted">{{ rows|length }} student record(s) in the selected scope</span><div><a class="btn sm gray" href="{{ url_for(export_ep, fmt='xlsx', **request.args) }}">Export Excel</a><a class="btn sm" href="{{ url_for(export_ep, fmt='pdf', **request.args) }}">Export PDF</a></div></div>
+
+  {% else %}
+    {# LECTURER CLASS ATTENDANCE REPORT #}
+    <div class="page-header role-page-header"><div><h1>Class Attendance Report</h1><p>Review attendance summaries for your assigned classes and export the report.</p></div></div>
+
+    <form class="card role-panel lecturer-report-criteria" method="get">
+      <div class="role-panel-heading"><div><h2>Report criteria</h2><p>Filter by class or search for a student.</p></div></div>
+      <div class="lecturer-report-filter-grid">
+        <div><label for="lecturer-report-class">Class</label><select id="lecturer-report-class" name="class_id"><option value="">All assigned classes</option>{% for x in classes %}<option value="{{ x.class_id }}" {{ 'selected' if f.class_id == x.class_id }}>{{ x.class_code }} · {{ x.course_name }}</option>{% endfor %}</select></div>
+        <div><label for="lecturer-report-search">Search student</label><input id="lecturer-report-search" name="q" value="{{ f.keyword }}" placeholder="Student name or student ID"></div>
+        <div class="lecturer-report-actions"><button class="btn" type="submit">Apply filters</button><a class="btn gray" href="{{ request.path }}">Reset</a></div>
+      </div>
+    </form>
+
+    <section class="card role-panel lecturer-report-results">
+      <div class="role-panel-heading"><div><h2>Attendance by student</h2><p>Aggregated attendance records across the selected class sessions.</p></div><span class="role-count-chip">{{ rows|length }} student(s)</span></div>
+      <div class="table-wrap"><table class="role-data-table"><thead><tr><th>Class</th><th>Course</th><th>Student ID</th><th>Student name</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Absence rate</th></tr></thead>
+        <tbody>{% for r in rows %}<tr><td><strong>{{ r.class_code }}</strong></td><td>{{ r.course_name }}</td><td>{{ r.student_code }}</td><td>{{ r.full_name }}</td><td><span class="badge PRESENT">{{ r.present }}</span></td><td><span class="badge LATE">{{ r.late }}</span></td><td><span class="badge ABSENT">{{ r.absent }}</span></td><td><span class="badge EXCUSED">{{ r.excused }}</span></td><td><strong class="{{ 'stats-risk-value' if r.rate > 20 else '' }}">{{ r.rate }}%</strong><div class="progress-track"><div class="progress-fill {{ 'danger' if r.rate > 20 else '' }}" style="width:{{ [r.rate, 100]|min }}%"></div></div></td></tr>
+        {% else %}<tr><td colspan="9" class="role-empty-cell">No attendance records match the selected criteria.</td></tr>{% endfor %}</tbody>
+      </table></div>
+    </section>
+    <div class="role-export-row"><span class="muted">Report contains {{ rows|length }} student record(s)</span><div><a class="btn sm gray" href="{{ url_for(export_ep, fmt='xlsx', **request.args) }}">Export Excel</a><a class="btn sm" href="{{ url_for(export_ep, fmt='pdf', **request.args) }}">Export PDF</a></div></div>
+  {% endif %}
+{% endblock %}

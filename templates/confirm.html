@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}{{ action.title() }} Account{% endblock %}
+{% block body %}
+  <div class="page-modal-backdrop">
+    <section class="page-modal-card page-confirm-card role-panel">
+      <div class="page-modal-heading"><div><h1>{{ 'Lock account' if action == 'lock' else 'Unlock account' }}</h1><p>Confirm this account access change.</p></div><a class="modal-close-link" href="{{ url_for('admin.users') }}" aria-label="Close">×</a></div>
+      <div class="confirm-account-summary"><span class="confirm-account-avatar">{{ (u.full_name or u.username)[:1].upper() }}</span><div><strong>{{ u.full_name }}</strong><small>@{{ u.username }}</small></div></div>
+      <p class="confirm-account-message">Are you sure you want to {{ action }} this account?</p>
+      <form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="page-modal-actions"><a class="btn gray" href="{{ url_for('admin.users') }}">Cancel</a><button class="btn {{ 'red' if action == 'lock' else 'green' }}" type="submit">{{ 'Lock account' if action == 'lock' else 'Unlock account' }}</button></div></form>
+    </section>
+  </div>
+{% endblock %}

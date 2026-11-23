@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Set New Password{% endblock %}
+{% block auth_body %}
+  <h1>Set New Password</h1>
+  <p class="auth-subtitle">Create a new password with at least 6 characters.</p>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="password">New password</label>
+    <input id="password" name="password" type="password" placeholder="Minimum 6 characters">
+    <label for="confirm">Confirm password</label>
+    <input id="confirm" name="confirm" type="password" placeholder="Re-enter new password">
+    <button class="btn-pill" type="submit">Save</button>
+  </form>
+{% endblock %}

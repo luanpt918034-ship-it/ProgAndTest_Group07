@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Login - Student Attendance System{% endblock %}
+{% block auth_body %}
+  <h1>Login</h1>
+  <p class="auth-subtitle">Student Attendance System &mdash; Sign in to your academic account</p>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="username">Username</label>
+    <input id="username" name="username" placeholder="Enter your username" autofocus>
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" placeholder="Enter your password" data-toggle-label="Show password">
+    <button class="btn-pill" type="submit">Login</button>
+  </form>
+  <div class="auth-footer-links">
+    <a href="{{ url_for('auth.forgot') }}">Forgot password?</a>
+  </div>
+{% endblock %}

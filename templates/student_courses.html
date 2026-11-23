@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}My Courses{% endblock %}
+{% block body %}
+  <div class="page-header">
+    <div>
+      <h1>My Courses</h1>
+      <p>Enrolled class sections for the current academic term.</p>
+    </div>
+    <a class="btn sm gray" href="{{ url_for('student.history') }}">View Attendance History</a>
+  </div>
+  <div class="card table-wrap">
+    <table>
+      <thead>
+        <tr><th>Class</th><th>Course</th><th>Semester</th><th>Lecturer</th></tr>
+      </thead>
+      <tbody>
+        {% for c in classes %}
+          <tr>
+            <td><strong>{{ c.class_code }}</strong></td>
+            <td>{{ c.course_name }}</td>
+            <td><span class="badge INFO">{{ c.semester }}</span></td>
+            <td>{{ c.lecturer_name }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="muted">You are not enrolled in any class.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

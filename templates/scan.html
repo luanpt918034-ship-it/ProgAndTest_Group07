@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Scan QR Code{% endblock %}
+{% block body %}
+  <div class="page-header">
+    <div>
+      <h1>Scan QR Code</h1>
+      <p>Scan the QR code projected by your lecturer or enter the session code manually.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card center">
+      <div class="card-header"><h2>Camera Scanner</h2></div>
+      <div id="reader" style="max-width:360px;margin:auto"></div>
+      <p class="muted" style="margin-top:12px">Point your camera at the QR code shown by your lecturer.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>Manual Token Entry</h2></div>
+      <p class="muted">If your camera is unavailable, enter the 64-character attendance code below:</p>
+      <form method="post" id="f">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="token">Attendance code</label>
+        <input name="token" id="token" autocomplete="off" placeholder="Paste or type attendance code">
+        <button class="btn blue" type="submit">Check in</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <script>
+    if (window.Html5QrcodeScanner) {
+      new Html5QrcodeScanner("reader", { fps: 10, qrbox: 220 }).render(function(t) {
+        document.getElementById("token").value = t;
+        document.getElementById("f").submit();
+      });
+    }
+  </script>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Manual Attendance{% endblock %}
+{% block body %}
+  <div class="page-header role-page-header">
+    <div><h1>Manual Attendance</h1><p>Mark or update attendance records for the selected class session.</p></div>
+    <a class="btn sm gray" href="{{ url_for('lecturer.class_details', class_id=cs.class_id) }}">Back to Class</a>
+  </div>
+
+  <section class="card role-panel selected-session-panel">
+    <div class="role-panel-heading"><div><h2>Selected session</h2><p>Confirm the class and session before saving attendance.</p></div></div>
+    <div class="role-fact-grid role-fact-grid-compact">
+      <div><span>Class</span><strong>{{ cs.class_name }}</strong></div>
+      <div><span>Session date</span><strong>{{ cs.session_date }}</strong></div>
+      <div><span>Time</span><strong>{{ cs.start_time }} – {{ cs.end_time }}</strong></div>
+      <div><span>Room</span><strong>{{ cs.room or '—' }}</strong></div>
+    </div>
+  </section>
+
+  <form class="card role-panel role-manual-form" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="role-panel-heading"><div><h2>Student attendance</h2><p>Select a new status only for students whose attendance needs to be recorded or corrected.</p></div><span class="role-count-chip">{{ rows|length }} student(s)</span></div>
+    <div class="table-wrap">
+      <table class="role-data-table">
+        <thead><tr><th>Student ID</th><th>Student name</th><th>Current status</th><th>New attendance status</th><th>Note</th></tr></thead>
+        <tbody>
+          {% for r in rows %}
+            <tr>
+              <td><strong>{{ r.student_code }}</strong></td>
+              <td>{{ r.full_name }}</td>
+              <td>{% if r.status %}<span class="badge {{ r.status }}">{{ r.status.title() }}</span>{% else %}<span class="muted">Not recorded</span>{% endif %}</td>
+              <td><select name="status_{{ r.user_id }}" aria-label="New attendance status for {{ r.full_name }}"><option value="">No change</option>{% for status in statuses %}<option value="{{ status }}">{{ status.title() }}</option>{% endfor %}</select></td>
+              <td><input name="reason_{{ r.user_id }}" placeholder="Optional note" aria-label="Note for {{ r.full_name }}"></td>
+            </tr>
+          {% else %}<tr><td colspan="5" class="role-empty-cell">No enrolled students found for this session.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="role-form-footer"><span class="muted">Every saved status change is recorded in the audit log.</span><button class="btn" type="submit">Save attendance</button></div>
+  </form>
+
+  <section class="card role-panel">
+    <div class="role-panel-heading"><div><h2>Attendance change history</h2><p>Audit log of manual attendance updates.</p></div></div>
+    <div class="table-wrap">
+      <table class="role-data-table"><thead><tr><th>Time</th><th>Student</th><th>Previous status</th><th>New status</th><th>Reason</th><th>Edited by</th></tr></thead>
+        <tbody>{% for l in logs %}<tr><td>{{ l.edited_at }}</td><td><strong>{{ l.student_code }}</strong></td><td>{{ l.old_status }}</td><td><span class="badge {{ l.new_status }}">{{ l.new_status.title() }}</span></td><td>{{ l.reason or '—' }}</td><td>{{ l.editor }}</td></tr>
+        {% else %}<tr><td colspan="6" class="role-empty-cell">No manual attendance changes have been made.</td></tr>{% endfor %}</tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}
